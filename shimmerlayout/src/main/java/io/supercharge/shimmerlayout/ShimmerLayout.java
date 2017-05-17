@@ -187,6 +187,8 @@ public class ShimmerLayout extends FrameLayout {
             destinationBitmap.recycle();
             destinationBitmap = null;
         }
+
+        canvasForRendering = null;
     }
 
     private Bitmap getDestinationBitmap() {

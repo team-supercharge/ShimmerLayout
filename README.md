@@ -8,7 +8,7 @@ ShimmerLayout can be used to add shimmer effect (like the one used at Facebook o
 
 Get the lasest artifact via gradle
 ```
-compile 'io.supercharge:shimmerlayout:0.1.0'
+compile 'io.supercharge:shimmerlayout:0.2.0'
 ```
 
 Create the layout on which you want to apply the effect and add as a child of a ShimmerLayout

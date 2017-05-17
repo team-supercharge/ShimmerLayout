@@ -31,5 +31,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
 
-    compile 'io.supercharge:shimmerlayout:0.1.0'
+    compile project(':shimmerlayout')
 }
