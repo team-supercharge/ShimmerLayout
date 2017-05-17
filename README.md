@@ -1,3 +1,5 @@
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-ShimmerLayout-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/5767)
+
 # ShimmerLayout
 
 ShimmerLayout can be used to add shimmer effect (like the one used at Facebook or at LinkedIn) to your android application. Beside memory efficiency even animating a big layout, you can modify the shimmer color and the speed of the animation as well.
