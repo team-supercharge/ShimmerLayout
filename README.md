@@ -2,18 +2,18 @@
 
 # ShimmerLayout
 
-ShimmerLayout can be used to add shimmer effect (like the one used at Facebook or at LinkedIn) to your android application. Beside memory efficiency even animating a big layout, you can modify the shimmer color and the speed of the animation as well.
+`ShimmerLayout` can be used to add shimmer effect (like the one used at Facebook or at LinkedIn) to your Android application. Beside memory efficiency even animating a big layout, you can modify the shimmer color and the speed of the animation as well.
 
 ![ShimmerLayout](shimmerlayout.gif)
 
 # Download and usage
 
 Get the latest artifact via gradle
-```
+```groovy
 compile 'io.supercharge:shimmerlayout:0.2.0'
 ```
 
-Create the layout on which you want to apply the effect and add as a child of a ShimmerLayout
+Create the layout on which you want to apply the effect and add as a child of a `ShimmerLayout`
 
 ```xml
 <io.supercharge.shimmerlayout.ShimmerLayout
@@ -29,7 +29,6 @@ Create the layout on which you want to apply the effect and add as a child of a 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_centerInParent="true"
             android:gravity="center"
             android:text="ShimmerLayout"
             android:textColor="@color/shimmer_background_color"
@@ -44,7 +43,7 @@ shimmerText.startShimmerAnimation();
 ```
 # License
 
-ShimmerLayout is opensource, contribution and feedback are welcome!
+`ShimmerLayout` is opensource, contribution and feedback are welcome!
 
 [Apache Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
 
