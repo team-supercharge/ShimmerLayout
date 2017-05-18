@@ -8,7 +8,7 @@ ShimmerLayout can be used to add shimmer effect (like the one used at Facebook o
 
 # Download and usage
 
-Get the lasest artifact via gradle
+Get the latest artifact via gradle
 ```
 compile 'io.supercharge:shimmerlayout:0.2.0'
 ```
@@ -37,7 +37,7 @@ Create the layout on which you want to apply the effect and add as a child of a 
     </io.supercharge.shimmerlayout.ShimmerLayout>
 ```
 
-Last, but not least you have start it from your Java code
+Last, but not least you have to start it from your Java code
 ```java
 ShimmerLayout shimmerText = (ShimmerLayout) findViewById(R.id.shimmer_text);
 shimmerText.startShimmerAnimation();
@@ -50,7 +50,7 @@ ShimmerLayout is opensource, contribution and feedback are welcome!
 
 
 ```
-Copyright 2015 Supercharge
+Copyright 2017 Supercharge
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
