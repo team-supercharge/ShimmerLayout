@@ -71,8 +71,6 @@ public class ShimmerLayout extends FrameLayout {
         } finally {
             a.recycle();
         }
-
-        shimmerColor = ContextCompat.getColor(context, R.color.shimmer_color);
     }
 
     @Override
