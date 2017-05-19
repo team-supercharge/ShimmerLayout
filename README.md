@@ -1,4 +1,5 @@
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-ShimmerLayout-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/5767)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.supercharge/shimmerlayout/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.supercharge/shimmerlayout)
 
 # ShimmerLayout
 
