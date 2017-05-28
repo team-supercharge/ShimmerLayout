@@ -9,9 +9,12 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.Shader;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -20,6 +23,7 @@ import android.widget.FrameLayout;
 
 public class ShimmerLayout extends FrameLayout {
 
+    private Rect maskRect;
     private Paint maskPaint;
 
     private ValueAnimator maskAnimator;
@@ -162,7 +166,7 @@ public class ShimmerLayout extends FrameLayout {
 
         drawMask(canvasForRendering);
         canvas.save();
-        canvas.clipRect(maskOffsetX, 0, maskOffsetX + getWidth() / 2, getHeight());
+        canvas.clipRect(maskOffsetX, 0, maskOffsetX + maskRect.width(), getHeight());
         canvas.drawBitmap(localAvailableBitmap, 0, 0, null);
         canvas.restore();
 
@@ -227,26 +231,23 @@ public class ShimmerLayout extends FrameLayout {
             return sourceMaskBitmap;
         }
 
-        int width = getWidth() / 2;
+        int width = maskRect.width();
         int height = getHeight();
-
-        sourceMaskBitmap = createBitmap(width, height);
-        Canvas canvas = new Canvas(sourceMaskBitmap);
 
         final int edgeColor = reduceColorAlphaValueToZero(shimmerColor);
         LinearGradient gradient = new LinearGradient(
-                0, 0,
-                width, 0,
+                -maskRect.left, 0,
+                width + maskRect.left, 0,
                 new int[]{edgeColor, shimmerColor, shimmerColor, edgeColor},
                 new float[]{0.25F, 0.47F, 0.53F, 0.75F},
                 Shader.TileMode.CLAMP);
-
-        canvas.rotate(20, width / 2, height / 2);
-
         Paint paint = new Paint();
         paint.setShader(gradient);
-        int padding = (int) (Math.sqrt(2) * Math.max(width, height)) / 2;
-        canvas.drawRect(0, -padding, width, height + padding, paint);
+
+        sourceMaskBitmap = createBitmap(width, height);
+        Canvas canvas = new Canvas(sourceMaskBitmap);
+        canvas.rotate(20, width / 2, height / 2);
+        canvas.drawRect(-maskRect.left, maskRect.top, width + maskRect.left, maskRect.bottom, paint);
 
         return sourceMaskBitmap;
     }
@@ -256,9 +257,13 @@ public class ShimmerLayout extends FrameLayout {
             return maskAnimator;
         }
 
+        if (maskRect == null){
+            maskRect = calculateMaskRect();
+        }
+
         final int animationToX = getWidth();
         final int animationFromX = -animationToX;
-        final int shimmerBitmapWidth = getWidth() / 2;
+        final int shimmerBitmapWidth = maskRect.width();
         final int shimmerAnimationFullLength = animationToX - animationFromX;
 
         maskAnimator = ValueAnimator.ofFloat(0.0F, 1.0F);
@@ -309,5 +314,60 @@ public class ShimmerLayout extends FrameLayout {
 
     private int reduceColorAlphaValueToZero(int actualColor) {
         return Color.argb(0, Color.red(actualColor), Color.green(actualColor), Color.blue(actualColor));
+    }
+
+    private Rect calculateMaskRect(){
+        int angle = 20;
+        int top = 0;
+        int right = (int) (getWidth() * 0.75);
+        int center = (int) (getHeight() * 0.5);
+        Point originalTopRight = new Point(right, top);
+        Point originalCenterRight = new Point(right, center);
+
+        Point rotatedTopRight = rotatePoint(originalTopRight, angle, getWidth() / 2, getHeight() / 2);
+        Point rotatedCenterRight = rotatePoint(originalCenterRight, angle, getWidth() / 2, getHeight() / 2);
+        Point rotatedIntersection = getTopIntersection(rotatedTopRight, rotatedCenterRight);
+        int halfMaskHeight = distanceBetween(rotatedCenterRight, rotatedIntersection);
+
+        int paddingVertical = (getHeight() / 2) - halfMaskHeight;
+        int paddingHorizontal = (getWidth() - rotatedIntersection.x);
+
+        return new Rect(paddingHorizontal, paddingVertical, getWidth() - paddingHorizontal, getHeight() - paddingVertical);
+    }
+
+    /**
+     * Finds the intersection of the line and the top of the canvas
+     * @param p1 First point of the line of which the intersection with the canvas should be determined
+     * @param p2 Second point of the line of which the intersection with the canvas should be determined
+     * @return The point of intersection
+     */
+    private Point getTopIntersection(Point p1, Point p2) {
+        double x1 = p1.x;
+        double x2 = p2.x;
+        double y1 = -p1.y;
+        double y2 = -p2.y;
+        // slope-intercept form of the line represented by the two points
+        double m = (y2 - y1) / (x2 - x1);
+        double b = y1 - m * x1;
+        // The intersection with the line represented by the top of the canvas
+        int x = (int) ((0 - b) / m);
+        int y = 0;
+        return new Point(x, y);
+    }
+
+    private Point rotatePoint(Point point, float degrees, float cx, float cy) {
+        float[] pts = new float[2];
+        pts[0] = point.x;
+        pts[1] = point.y;
+
+        Matrix transform = new Matrix();
+        transform.setRotate(degrees, cx, cy);
+        transform.mapPoints(pts);
+
+        return new Point((int) pts[0], (int) pts[1]);
+    }
+
+    private int distanceBetween(Point p1, Point p2) {
+        return (int) Math.ceil(Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)));
     }
 }
