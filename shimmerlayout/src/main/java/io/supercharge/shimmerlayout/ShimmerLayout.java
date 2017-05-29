@@ -13,8 +13,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Shader;
-import android.support.annotation.ColorInt;
-import android.support.v4.content.ContextCompat;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
@@ -38,7 +37,6 @@ public class ShimmerLayout extends FrameLayout {
 
     private int shimmerAnimationDuration;
 
-    @ColorInt
     private int shimmerColor;
 
     public ShimmerLayout(Context context) {
@@ -67,7 +65,7 @@ public class ShimmerLayout extends FrameLayout {
 
         try {
             shimmerAnimationDuration = a.getInteger(R.styleable.ShimmerLayout_shimmer_animation_duration, 1500);
-            shimmerColor = a.getColor(R.styleable.ShimmerLayout_shimmer_color, ContextCompat.getColor(context, R.color.shimmer_color));
+            shimmerColor = a.getColor(R.styleable.ShimmerLayout_shimmer_color, getColor(R.color.shimmer_color));
         } finally {
             a.recycle();
         }
@@ -261,6 +259,15 @@ public class ShimmerLayout extends FrameLayout {
         } catch (OutOfMemoryError e) {
             System.gc();
             return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        }
+    }
+
+    private int getColor(int id) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return getContext().getColor(id);
+        } else {
+            //noinspection deprecation
+            return getResources().getColor(id);
         }
     }
 }
