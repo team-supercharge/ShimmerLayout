@@ -1,5 +1,10 @@
 # Change Log
 
+Version 0.4.0 *(2017-05-29)*
+----------------------------
+
+* Remove dependency on appcompat
+
 Version 0.3.0 *(2017-05-18)*
 ----------------------------
 
