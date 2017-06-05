@@ -114,7 +114,15 @@ public class ShimmerLayout extends FrameLayout {
 
     public void setShimmerColor(int shimmerColor) {
         this.shimmerColor = shimmerColor;
+        resetIfStarted();
+    }
 
+    public void setShimmerAnimationDuration(int durationMillis) {
+        this.shimmerAnimationDuration = durationMillis;
+        resetIfStarted();
+    }
+
+    private void resetIfStarted() {
         if (isAnimationStarted) {
             resetShimmering();
             startShimmerAnimation();

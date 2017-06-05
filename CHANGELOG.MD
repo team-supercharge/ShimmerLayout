@@ -1,4 +1,7 @@
 # Change Log
+Unreleased
+----------
+* Add setter for shimmer animation duration
 
 Version 0.4.0 *(2017-05-29)*
 ----------------------------
