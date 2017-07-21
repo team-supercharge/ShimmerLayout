@@ -178,6 +178,7 @@
         android:layout_marginTop="50dp"
         android:paddingLeft="30dp"
         android:paddingRight="30dp"
+        app:shimmer_auto_start="true"
         app:shimmer_animation_duration="1200">
 
         <TextView
@@ -185,7 +186,7 @@
             android:layout_height="match_parent"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:text="ShimmerLayout"
+            android:text="ShimmerLayout Auto Start"
             android:textColor="@color/shimmer_background_color"
             android:textSize="26sp"/>
     </io.supercharge.shimmerlayout.ShimmerLayout>
