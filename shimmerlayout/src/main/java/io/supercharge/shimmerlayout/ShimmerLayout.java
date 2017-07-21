@@ -297,7 +297,7 @@ public class ShimmerLayout extends FrameLayout {
     }
 
     private void removeGlobalListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
-        if (Build.VERSION.SDK_INT > 15) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             getViewTreeObserver().removeOnGlobalLayoutListener(listener);
         } else {
             getViewTreeObserver().removeGlobalOnLayoutListener(listener);
