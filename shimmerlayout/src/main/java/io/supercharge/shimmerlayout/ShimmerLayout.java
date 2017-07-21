@@ -35,6 +35,8 @@ public class ShimmerLayout extends FrameLayout {
 
     private boolean isAnimationStarted;
 
+    private boolean autoStart;
+
     private int shimmerAnimationDuration;
 
     private int shimmerColor;
@@ -66,8 +68,13 @@ public class ShimmerLayout extends FrameLayout {
         try {
             shimmerAnimationDuration = a.getInteger(R.styleable.ShimmerLayout_shimmer_animation_duration, 1500);
             shimmerColor = a.getColor(R.styleable.ShimmerLayout_shimmer_color, getColor(R.color.shimmer_color));
+            autoStart = a.getBoolean(R.styleable.ShimmerLayout_shimmer_auto_start, false);
         } finally {
             a.recycle();
+        }
+
+        if (autoStart && getVisibility() == VISIBLE) {
+            startShimmerAnimation();
         }
     }
 
@@ -86,6 +93,16 @@ public class ShimmerLayout extends FrameLayout {
         }
     }
 
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        if (visibility == VISIBLE) {
+            if (autoStart) startShimmerAnimation();
+        } else {
+            stopShimmerAnimation();
+        }
+    }
+
     public void startShimmerAnimation() {
         if (isAnimationStarted) {
             return;
@@ -95,7 +112,11 @@ public class ShimmerLayout extends FrameLayout {
             getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
-                    ShimmerLayout.this.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    if (Build.VERSION.SDK_INT > 15) {
+                        ShimmerLayout.this.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    } else {
+                        ShimmerLayout.this.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    }
                     startShimmerAnimation();
                 }
             });
