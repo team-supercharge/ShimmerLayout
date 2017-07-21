@@ -97,7 +97,8 @@ public class ShimmerLayout extends FrameLayout {
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
         if (visibility == VISIBLE) {
-            if (autoStart) startShimmerAnimation();
+            if (autoStart)
+                startShimmerAnimation();
         } else {
             stopShimmerAnimation();
         }
