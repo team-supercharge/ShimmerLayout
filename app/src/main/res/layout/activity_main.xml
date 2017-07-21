@@ -177,8 +177,8 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="50dp"
         android:paddingLeft="30dp"
-        app:shimmer_auto_start="true"
         android:paddingRight="30dp"
+        app:shimmer_auto_start="true"
         app:shimmer_animation_duration="1200">
 
         <TextView
