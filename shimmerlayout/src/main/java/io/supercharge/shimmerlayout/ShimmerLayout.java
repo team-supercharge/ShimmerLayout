@@ -112,7 +112,11 @@ public class ShimmerLayout extends FrameLayout {
             getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
-                    ShimmerLayout.this.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    if (Build.VERSION.SDK_INT > 15) {
+                        ShimmerLayout.this.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    } else {
+                        ShimmerLayout.this.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    }
                     startShimmerAnimation();
                 }
             });
