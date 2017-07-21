@@ -35,6 +35,8 @@ public class ShimmerLayout extends FrameLayout {
 
     private boolean isAnimationStarted;
 
+    private boolean autoStart;
+
     private int shimmerAnimationDuration;
 
     private int shimmerColor;
@@ -66,8 +68,13 @@ public class ShimmerLayout extends FrameLayout {
         try {
             shimmerAnimationDuration = a.getInteger(R.styleable.ShimmerLayout_shimmer_animation_duration, 1500);
             shimmerColor = a.getColor(R.styleable.ShimmerLayout_shimmer_color, getColor(R.color.shimmer_color));
+            autoStart = a.getBoolean(R.styleable.ShimmerLayout_shimmer_auto_start, false);
         } finally {
             a.recycle();
+        }
+
+        if (autoStart && getVisibility() == VISIBLE) {
+            startShimmerAnimation();
         }
     }
 
@@ -83,6 +90,16 @@ public class ShimmerLayout extends FrameLayout {
             super.dispatchDraw(canvas);
         } else {
             dispatchDrawUsingBitmap(canvas);
+        }
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        if (visibility == VISIBLE) {
+            if (autoStart) startShimmerAnimation();
+        } else {
+            stopShimmerAnimation();
         }
     }
 
