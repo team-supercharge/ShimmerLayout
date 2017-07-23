@@ -1,7 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="io.supercharge.shimmerlayout">
+<manifest package="io.supercharge.shimmerlayout">
 
-    <application
-        android:supportsRtl="true"/>
+    <application/>
 
 </manifest>
