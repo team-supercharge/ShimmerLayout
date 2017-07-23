@@ -12,7 +12,7 @@
 
 Get the latest artifact via gradle
 ```groovy
-compile 'io.supercharge:shimmerlayout:0.5.0'
+compile 'io.supercharge:shimmerlayout:0.6.0'
 ```
 
 Create the layout on which you want to apply the effect and add as a child of a `ShimmerLayout`

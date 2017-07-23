@@ -1,5 +1,10 @@
 # Change Log
 
+Version 0.6.0 *(2017-07-23)*
+----------------------------
+
+* Remove supportsRtl from manifest
+
 Version 0.5.0 *(2017-07-12)*
 ----------------------------
 
