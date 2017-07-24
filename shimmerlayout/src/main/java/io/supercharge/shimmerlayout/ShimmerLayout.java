@@ -114,7 +114,7 @@ public class ShimmerLayout extends FrameLayout {
             getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
-                    ShimmerLayout.this.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    removeGlobalLayoutListener(this);
                     startShimmerAnimation();
                 }
             });
@@ -295,6 +295,14 @@ public class ShimmerLayout extends FrameLayout {
         } else {
             //noinspection deprecation
             return getResources().getColor(id);
+        }
+    }
+
+    private void removeGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            getViewTreeObserver().removeOnGlobalLayoutListener(listener);
+        } else {
+            getViewTreeObserver().removeGlobalOnLayoutListener(listener);
         }
     }
 }
