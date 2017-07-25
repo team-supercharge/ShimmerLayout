@@ -14,8 +14,5 @@ public class MainActivity extends AppCompatActivity {
 
         ShimmerLayout shimmerLayout = (ShimmerLayout) findViewById(R.id.shimmer_layout);
         shimmerLayout.startShimmerAnimation();
-
-        ShimmerLayout shimmerText = (ShimmerLayout) findViewById(R.id.shimmer_text);
-        shimmerText.startShimmerAnimation();
     }
 }
