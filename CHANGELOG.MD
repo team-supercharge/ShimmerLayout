@@ -1,5 +1,11 @@
 # Change Log
 
+Version 0.7.0 *(2017-07-25)*
+----------------------------
+
+* Add auto start feature
+* Change minimum API to 14
+
 Version 0.6.0 *(2017-07-23)*
 ----------------------------
 
