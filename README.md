@@ -44,6 +44,10 @@ Last, but not least you have to start it from your Java code
 ShimmerLayout shimmerText = (ShimmerLayout) findViewById(R.id.shimmer_text);
 shimmerText.startShimmerAnimation();
 ```
+# Further reading
+
+* [The development of ShimmerLayout](https://medium.com/supercharges-mobile-product-guide/shimmerlayout-26978ab53c28)  - In this article you can read why we created this library and the technologies we used.
+
 # License
 
 `ShimmerLayout` is opensource, contribution and feedback are welcome!
