@@ -1,5 +1,10 @@
 # Change Log
 
+Version 0.8.0 *(2017-07-31)*
+----------------------------
+
+* Make the shimmer line and the transition of the shimmer color smoother
+
 Version 0.7.0 *(2017-07-25)*
 ----------------------------
 
