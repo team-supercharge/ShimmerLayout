@@ -233,11 +233,12 @@ public class ShimmerLayout extends FrameLayout {
         sourceMaskBitmap = createBitmap(width, height);
         Canvas canvas = new Canvas(sourceMaskBitmap);
 
+        final int edgeColor = reduceColorAlphaValueToZero(shimmerColor);
         LinearGradient gradient = new LinearGradient(
                 0, 0,
                 width, 0,
-                new int[]{Color.TRANSPARENT, shimmerColor, shimmerColor, Color.TRANSPARENT},
-                new float[]{0.25F, 0.5F, 0.5F, 0.75F},
+                new int[]{edgeColor, shimmerColor, shimmerColor, edgeColor},
+                new float[]{0.25F, 0.47F, 0.53F, 0.75F},
                 Shader.TileMode.CLAMP);
 
         canvas.rotate(20, width / 2, height / 2);
@@ -304,5 +305,9 @@ public class ShimmerLayout extends FrameLayout {
         } else {
             getViewTreeObserver().removeGlobalOnLayoutListener(listener);
         }
+    }
+
+    private int reduceColorAlphaValueToZero(int actualColor) {
+        return Color.argb(0, Color.red(actualColor), Color.green(actualColor), Color.blue(actualColor));
     }
 }
