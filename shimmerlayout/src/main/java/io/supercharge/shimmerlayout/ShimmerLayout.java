@@ -23,27 +23,27 @@ import android.widget.FrameLayout;
 
 public class ShimmerLayout extends FrameLayout {
 
+    private static final int DEFAULT_ANIMATION_DURATION = 1500;
+    private static final int DEFAULT_ANGLE = 20;
+    private static final int MIN_ANGLE_VALUE = 0;
+    private static final int MAX_ANGLE_VALUE = 30;
+
+    private int maskOffsetX;
     private Rect maskRect;
     private Paint maskPaint;
-
     private ValueAnimator maskAnimator;
 
     private Bitmap localAvailableBitmap;
     private Bitmap localMaskBitmap;
-
     private Bitmap destinationBitmap;
     private Bitmap sourceMaskBitmap;
     private Canvas canvasForRendering;
 
-    private int maskOffsetX;
-
     private boolean isAnimationStarted;
-
     private boolean autoStart;
-
     private int shimmerAnimationDuration;
-
     private int shimmerColor;
+    private int shimmerAngle;
 
     public ShimmerLayout(Context context) {
         this(context, null);
@@ -70,13 +70,15 @@ public class ShimmerLayout extends FrameLayout {
                 0, 0);
 
         try {
-            shimmerAnimationDuration = a.getInteger(R.styleable.ShimmerLayout_shimmer_animation_duration, 1500);
+            shimmerAngle = a.getInteger(R.styleable.ShimmerLayout_shimmer_angle, DEFAULT_ANGLE);
+            shimmerAnimationDuration = a.getInteger(R.styleable.ShimmerLayout_shimmer_animation_duration, DEFAULT_ANIMATION_DURATION);
             shimmerColor = a.getColor(R.styleable.ShimmerLayout_shimmer_color, getColor(R.color.shimmer_color));
             autoStart = a.getBoolean(R.styleable.ShimmerLayout_shimmer_auto_start, false);
         } finally {
             a.recycle();
         }
 
+        setShimmerAngle(shimmerAngle);
         if (autoStart && getVisibility() == VISIBLE) {
             startShimmerAnimation();
         }
@@ -142,6 +144,22 @@ public class ShimmerLayout extends FrameLayout {
 
     public void setShimmerAnimationDuration(int durationMillis) {
         this.shimmerAnimationDuration = durationMillis;
+        resetIfStarted();
+    }
+
+    /**
+     * Set the angle of the shimmer effect in clockwise direction in degrees.
+     * The angle must be between {@value #MIN_ANGLE_VALUE} and {@value #MAX_ANGLE_VALUE}.
+     *
+     * @param angle The angle to be set
+     */
+    public void setShimmerAngle(int angle) {
+        if (angle < MIN_ANGLE_VALUE || MAX_ANGLE_VALUE < angle) {
+            throw new IllegalArgumentException(String.format("shimmerAngle value must be between %d and %d",
+                    MIN_ANGLE_VALUE,
+                    MAX_ANGLE_VALUE));
+        }
+        this.shimmerAngle = angle;
         resetIfStarted();
     }
 
@@ -246,7 +264,7 @@ public class ShimmerLayout extends FrameLayout {
 
         sourceMaskBitmap = createBitmap(width, height);
         Canvas canvas = new Canvas(sourceMaskBitmap);
-        canvas.rotate(20, width / 2, height / 2);
+        canvas.rotate(shimmerAngle, width / 2, height / 2);
         canvas.drawRect(-maskRect.left, maskRect.top, width + maskRect.left, maskRect.bottom, paint);
 
         return sourceMaskBitmap;
@@ -257,7 +275,7 @@ public class ShimmerLayout extends FrameLayout {
             return maskAnimator;
         }
 
-        if (maskRect == null){
+        if (maskRect == null) {
             maskRect = calculateMaskRect();
         }
 
@@ -316,16 +334,19 @@ public class ShimmerLayout extends FrameLayout {
         return Color.argb(0, Color.red(actualColor), Color.green(actualColor), Color.blue(actualColor));
     }
 
-    private Rect calculateMaskRect(){
-        int angle = 20;
+    private Rect calculateMaskRect() {
+        if (shimmerAngle == 0) {
+            return new Rect((int) (getWidth() * 0.25), 0, (int) (getWidth() * 0.75), getHeight());
+        }
+
         int top = 0;
         int right = (int) (getWidth() * 0.75);
         int center = (int) (getHeight() * 0.5);
         Point originalTopRight = new Point(right, top);
         Point originalCenterRight = new Point(right, center);
 
-        Point rotatedTopRight = rotatePoint(originalTopRight, angle, getWidth() / 2, getHeight() / 2);
-        Point rotatedCenterRight = rotatePoint(originalCenterRight, angle, getWidth() / 2, getHeight() / 2);
+        Point rotatedTopRight = rotatePoint(originalTopRight, shimmerAngle, getWidth() / 2, getHeight() / 2);
+        Point rotatedCenterRight = rotatePoint(originalCenterRight, shimmerAngle, getWidth() / 2, getHeight() / 2);
         Point rotatedIntersection = getTopIntersection(rotatedTopRight, rotatedCenterRight);
         int halfMaskHeight = distanceBetween(rotatedCenterRight, rotatedIntersection);
 
@@ -337,6 +358,7 @@ public class ShimmerLayout extends FrameLayout {
 
     /**
      * Finds the intersection of the line and the top of the canvas
+     *
      * @param p1 First point of the line of which the intersection with the canvas should be determined
      * @param p2 Second point of the line of which the intersection with the canvas should be determined
      * @return The point of intersection
