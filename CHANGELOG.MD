@@ -1,5 +1,11 @@
 # Change Log
 
+Version 1.0.0 *(2017-08-03)*
+----------------------------
+
+* Fix mask size issue
+* Add shimmer rotation feature
+
 Version 0.8.0 *(2017-07-31)*
 ----------------------------
 
