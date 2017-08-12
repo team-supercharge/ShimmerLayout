@@ -335,25 +335,26 @@ public class ShimmerLayout extends FrameLayout {
     }
 
     private Rect calculateMaskRect() {
+        int shimmerWidth = getWidth() / 2;
         if (shimmerAngle == 0) {
-            return new Rect((int) (getWidth() * 0.25), 0, (int) (getWidth() * 0.75), getHeight());
+            return new Rect((int) (shimmerWidth * 0.25), 0, (int) (shimmerWidth * 0.75), getHeight());
         }
 
         int top = 0;
-        int right = (int) (getWidth() * 0.75);
         int center = (int) (getHeight() * 0.5);
+        int right = (int) (shimmerWidth * 0.75);
         Point originalTopRight = new Point(right, top);
         Point originalCenterRight = new Point(right, center);
 
-        Point rotatedTopRight = rotatePoint(originalTopRight, shimmerAngle, getWidth() / 2, getHeight() / 2);
-        Point rotatedCenterRight = rotatePoint(originalCenterRight, shimmerAngle, getWidth() / 2, getHeight() / 2);
+        Point rotatedTopRight = rotatePoint(originalTopRight, shimmerAngle, shimmerWidth / 2, getHeight() / 2);
+        Point rotatedCenterRight = rotatePoint(originalCenterRight, shimmerAngle, shimmerWidth / 2, getHeight() / 2);
         Point rotatedIntersection = getTopIntersection(rotatedTopRight, rotatedCenterRight);
         int halfMaskHeight = distanceBetween(rotatedCenterRight, rotatedIntersection);
 
         int paddingVertical = (getHeight() / 2) - halfMaskHeight;
-        int paddingHorizontal = (getWidth() - rotatedIntersection.x);
+        int paddingHorizontal = (shimmerWidth - rotatedIntersection.x);
 
-        return new Rect(paddingHorizontal, paddingVertical, getWidth() - paddingHorizontal, getHeight() - paddingVertical);
+        return new Rect(paddingHorizontal, paddingVertical, shimmerWidth - paddingHorizontal, getHeight() - paddingVertical);
     }
 
     /**
