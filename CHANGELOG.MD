@@ -1,5 +1,10 @@
 # Change Log
 
+Version 1.0.2 *(2017-08-15)*
+----------------------------
+
+* Fix stop animation issue when view is not yet measured
+
 Version 1.0.1 *(2017-08-12)*
 ----------------------------
 
