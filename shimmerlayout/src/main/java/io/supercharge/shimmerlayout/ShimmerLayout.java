@@ -45,6 +45,8 @@ public class ShimmerLayout extends FrameLayout {
     private int shimmerColor;
     private int shimmerAngle;
 
+    private ViewTreeObserver.OnGlobalLayoutListener startAnimationGlobalLayoutListener;
+
     public ShimmerLayout(Context context) {
         this(context, null);
     }
@@ -117,13 +119,15 @@ public class ShimmerLayout extends FrameLayout {
         }
 
         if (getWidth() == 0) {
-            getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            startAnimationGlobalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
                     removeGlobalLayoutListener(this);
                     startShimmerAnimation();
                 }
-            });
+            };
+
+            getViewTreeObserver().addOnGlobalLayoutListener(startAnimationGlobalLayoutListener);
 
             return;
         }
@@ -134,6 +138,10 @@ public class ShimmerLayout extends FrameLayout {
     }
 
     public void stopShimmerAnimation() {
+        if (startAnimationGlobalLayoutListener != null) {
+            removeGlobalLayoutListener(startAnimationGlobalLayoutListener);
+        }
+
         resetShimmering();
     }
 
