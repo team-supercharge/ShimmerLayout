@@ -1,0 +1,4 @@
+ext {
+    libVersionCode = 1
+    libVersionName = "0.1.0"
+}
