@@ -8,8 +8,12 @@ buildscript {
 }
 
 allprojects {
+    apply from: "$rootDir/.buildscript/androidVersions.gradle"
+    apply from: "$rootDir/.buildscript/libVersions.gradle"
+
     repositories {
         jcenter()
+        google()
     }
 }
 
