@@ -12,7 +12,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ShimmerLayout shimmerLayout = (ShimmerLayout) findViewById(R.id.shimmer_layout);
+        ShimmerLayout shimmerLayout = findViewById(R.id.shimmer_layout);
         shimmerLayout.startShimmerAnimation();
     }
 }
