@@ -5,5 +5,7 @@
         <attr name="shimmer_animation_duration" format="integer|reference"/>
         <attr name="shimmer_auto_start" format="boolean|reference"/>
         <attr name="shimmer_angle" format="integer|reference"/>
+        <attr name="shimmer_mask_width" format="float|reference"/>
+        <attr name="shimmer_gradient_center_color_width" format="float|reference"/>
     </declare-styleable>
 </resources>
