@@ -10,3 +10,6 @@ android:
     - build-tools-27.0.1
     - android-27
     - extra-android-m2repository
+
+before_install:
+- yes | sdkmanager "platforms;android-27" # https://github.com/travis-ci/travis-ci/issues/8651
