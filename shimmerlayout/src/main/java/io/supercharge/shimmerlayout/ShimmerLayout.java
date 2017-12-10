@@ -288,7 +288,14 @@ public class ShimmerLayout extends FrameLayout {
         }
 
         final int animationToX = getWidth();
-        final int animationFromX = -animationToX;
+        final int animationFromX;
+
+        if (getWidth() > maskRect.width()) {
+            animationFromX = -animationToX;
+        } else {
+            animationFromX = -maskRect.width();
+        }
+
         final int shimmerBitmapWidth = maskRect.width();
         final int shimmerAnimationFullLength = animationToX - animationFromX;
 
