@@ -27,6 +27,10 @@ public class ShimmerLayout extends FrameLayout {
     private static final int DEFAULT_ANGLE = 20;
     private static final int MIN_ANGLE_VALUE = 0;
     private static final int MAX_ANGLE_VALUE = 30;
+    private static final int MIN_MASK_WIDTH_VALUE = 0;
+    private static final int MAX_MASK_WIDTH_VALUE = 1;
+    private static final int MIN_GRADIENT_CENTER_COLOR_WIDTH_VALUE = 0;
+    private static final int MAX_GRADIENT_CENTER_COLOR_WIDTH_VALUE = 1;
 
     private int maskOffsetX;
     private Rect maskRect;
@@ -44,6 +48,8 @@ public class ShimmerLayout extends FrameLayout {
     private int shimmerAnimationDuration;
     private int shimmerColor;
     private int shimmerAngle;
+    private float maskWidth;
+    private float gradientCenterColorWidth;
 
     private ViewTreeObserver.OnGlobalLayoutListener startAnimationGlobalLayoutListener;
 
@@ -76,10 +82,14 @@ public class ShimmerLayout extends FrameLayout {
             shimmerAnimationDuration = a.getInteger(R.styleable.ShimmerLayout_shimmer_animation_duration, DEFAULT_ANIMATION_DURATION);
             shimmerColor = a.getColor(R.styleable.ShimmerLayout_shimmer_color, getColor(R.color.shimmer_color));
             autoStart = a.getBoolean(R.styleable.ShimmerLayout_shimmer_auto_start, false);
+            maskWidth = a.getFloat(R.styleable.ShimmerLayout_shimmer_mask_width, 0.5F);
+            gradientCenterColorWidth = a.getFloat(R.styleable.ShimmerLayout_shimmer_gradient_center_color_width, 0.06F);
         } finally {
             a.recycle();
         }
 
+        setMaskWidth(maskWidth);
+        setGradientCenterColorWidth(gradientCenterColorWidth);
         setShimmerAngle(shimmerAngle);
         if (autoStart && getVisibility() == VISIBLE) {
             startShimmerAnimation();
@@ -168,6 +178,45 @@ public class ShimmerLayout extends FrameLayout {
                     MAX_ANGLE_VALUE));
         }
         this.shimmerAngle = angle;
+        resetIfStarted();
+    }
+
+    /**
+     * Sets the width of the shimmer line to a value higher than 0 to less or equal to 1.
+     * 1 means the width of the shimmer line is equal to half of the width of the ShimmerLayout.
+     * This value must be higher than {@link #gradientCenterColorWidth} or the shape of the shimmer line
+     * will not look like as expected.
+     * The default value is 0.5.
+     *
+     * @param maskWidth The width of the shimmer line.
+     */
+    public void setMaskWidth(float maskWidth) {
+        if (maskWidth <= MIN_MASK_WIDTH_VALUE || MAX_MASK_WIDTH_VALUE < maskWidth) {
+            throw new IllegalArgumentException(String.format("maskWidth value must be higher than %d and less or equal to %d",
+                    MIN_MASK_WIDTH_VALUE, MAX_MASK_WIDTH_VALUE));
+        }
+
+        this.maskWidth = maskWidth;
+        resetIfStarted();
+    }
+
+    /**
+     * Sets the width of the center gradient color to a value higher than 0 to less or equal to 1.
+     * 1 means that the whole shimmer line will have this color without transparent edges.
+     * This value must be less than {@link #maskWidth} or the shape of the shimmer line
+     * will not look like as expected.
+     * The default value is 0.06.
+     *
+     * @param gradientCenterColorWidth The width of the center gradient color.
+     */
+    public void setGradientCenterColorWidth(float gradientCenterColorWidth) {
+        if (gradientCenterColorWidth <= MIN_GRADIENT_CENTER_COLOR_WIDTH_VALUE
+                || MAX_GRADIENT_CENTER_COLOR_WIDTH_VALUE < gradientCenterColorWidth) {
+            throw new IllegalArgumentException(String.format("gradientCenterColorWidth value must be higher than %d and less or equal to %d",
+                    MIN_GRADIENT_CENTER_COLOR_WIDTH_VALUE, MAX_GRADIENT_CENTER_COLOR_WIDTH_VALUE));
+        }
+
+        this.gradientCenterColorWidth = gradientCenterColorWidth;
         resetIfStarted();
     }
 
@@ -265,7 +314,7 @@ public class ShimmerLayout extends FrameLayout {
                 -maskRect.left, 0,
                 width + maskRect.left, 0,
                 new int[]{edgeColor, shimmerColor, shimmerColor, edgeColor},
-                new float[]{0.25F, 0.47F, 0.53F, 0.75F},
+                getGradientColorDistribution(),
                 Shader.TileMode.CLAMP);
         Paint paint = new Paint();
         paint.setShader(gradient);
@@ -352,12 +401,13 @@ public class ShimmerLayout extends FrameLayout {
     private Rect calculateMaskRect() {
         int shimmerWidth = getWidth() / 2;
         if (shimmerAngle == 0) {
-            return new Rect((int) (shimmerWidth * 0.25), 0, (int) (shimmerWidth * 0.75), getHeight());
+            return new Rect((int) (shimmerWidth * getMaskPositionStartRatio()),
+                    0, (int) (shimmerWidth * getMaskPositionEndRatio()), getHeight());
         }
 
         int top = 0;
         int center = (int) (getHeight() * 0.5);
-        int right = (int) (shimmerWidth * 0.75);
+        int right = (int) (shimmerWidth * getMaskPositionEndRatio());
         Point originalTopRight = new Point(right, top);
         Point originalCenterRight = new Point(right, center);
 
@@ -407,5 +457,25 @@ public class ShimmerLayout extends FrameLayout {
 
     private int distanceBetween(Point p1, Point p2) {
         return (int) Math.ceil(Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)));
+    }
+
+    private float[] getGradientColorDistribution() {
+        final float[] colorDistribution = new float[4];
+
+        colorDistribution[0] = getMaskPositionStartRatio();
+        colorDistribution[3] = getMaskPositionEndRatio();
+
+        colorDistribution[1] = 0.5F - gradientCenterColorWidth / 2F;
+        colorDistribution[2] = 0.5F + gradientCenterColorWidth / 2F;
+
+        return colorDistribution;
+    }
+
+    private float getMaskPositionStartRatio() {
+        return (1F - maskWidth) / 2F;
+    }
+
+    private float getMaskPositionEndRatio() {
+        return 1F - getMaskPositionStartRatio();
     }
 }
