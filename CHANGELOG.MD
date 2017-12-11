@@ -1,5 +1,13 @@
 # Change Log
 
+Version 1.1.0 *(2017-12-11)*
+----------------------------
+
+* Add mask width and gradient color width attributes
+* Fix shimmer line starting position
+* Update Android SDK to 27
+* Update Android Plugin for Gradle to 3.0.1
+
 Version 1.0.2 *(2017-08-15)*
 ----------------------------
 
