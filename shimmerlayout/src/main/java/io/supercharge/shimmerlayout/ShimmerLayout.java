@@ -98,7 +98,7 @@ public class ShimmerLayout extends FrameLayout {
 
     @Override
     protected void onDetachedFromWindow() {
-        resetShimmering();
+        //resetShimmering();
         super.onDetachedFromWindow();
     }
 
