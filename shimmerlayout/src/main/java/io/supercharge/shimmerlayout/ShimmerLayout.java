@@ -22,7 +22,6 @@ import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
 public class ShimmerLayout extends FrameLayout {
-
     private static final int DEFAULT_ANIMATION_DURATION = 1500;
     private static final int DEFAULT_ANGLE = 20;
     private static final int MIN_ANGLE_VALUE = 0;
@@ -36,12 +35,6 @@ public class ShimmerLayout extends FrameLayout {
     private Rect maskRect;
     private Paint maskPaint;
     private ValueAnimator maskAnimator;
-
-    private Bitmap localAvailableBitmap;
-    private Bitmap localMaskBitmap;
-    private Bitmap destinationBitmap;
-    private Bitmap sourceMaskBitmap;
-    private Canvas canvasForRendering;
 
     private boolean isAnimationStarted;
     private boolean autoStart;
@@ -229,28 +222,23 @@ public class ShimmerLayout extends FrameLayout {
 
     private void dispatchDrawUsingBitmap(Canvas canvas) {
         super.dispatchDraw(canvas);
-
-        localAvailableBitmap = getDestinationBitmap();
-        if (localAvailableBitmap == null) {
+        final Bitmap localAvailableBitmap = createBitmap(getWidth(), getHeight());
+        if (null == localAvailableBitmap) {
             return;
         }
 
-        if (canvasForRendering == null) {
-            canvasForRendering = new Canvas(localAvailableBitmap);
-        }
-
-        drawMask(canvasForRendering);
+        drawMask(new Canvas(localAvailableBitmap));
         canvas.save();
         canvas.clipRect(maskOffsetX, 0, maskOffsetX + maskRect.width(), getHeight());
         canvas.drawBitmap(localAvailableBitmap, 0, 0, null);
-        canvas.restore();
 
-        localAvailableBitmap = null;
+        canvas.restore();
+        localAvailableBitmap.recycle();
     }
 
     private void drawMask(Canvas renderCanvas) {
-        localMaskBitmap = getSourceMaskBitmap();
-        if (localMaskBitmap == null) {
+        final Bitmap localMaskBitmap = getSourceMaskBitmap();
+        if (null == localMaskBitmap) {
             return;
         }
 
@@ -263,8 +251,7 @@ public class ShimmerLayout extends FrameLayout {
         renderCanvas.drawBitmap(localMaskBitmap, maskOffsetX, 0, maskPaint);
 
         renderCanvas.restore();
-
-        localMaskBitmap = null;
+        localMaskBitmap.recycle();
     }
 
     private void resetShimmering() {
@@ -275,37 +262,9 @@ public class ShimmerLayout extends FrameLayout {
 
         maskAnimator = null;
         isAnimationStarted = false;
-
-        releaseBitMaps();
-    }
-
-    private void releaseBitMaps() {
-        if (sourceMaskBitmap != null) {
-            sourceMaskBitmap.recycle();
-            sourceMaskBitmap = null;
-        }
-
-        if (destinationBitmap != null) {
-            destinationBitmap.recycle();
-            destinationBitmap = null;
-        }
-
-        canvasForRendering = null;
-    }
-
-    private Bitmap getDestinationBitmap() {
-        if (destinationBitmap == null) {
-            destinationBitmap = createBitmap(getWidth(), getHeight());
-        }
-
-        return destinationBitmap;
     }
 
     private Bitmap getSourceMaskBitmap() {
-        if (sourceMaskBitmap != null) {
-            return sourceMaskBitmap;
-        }
-
         int width = maskRect.width();
         int height = getHeight();
 
@@ -319,7 +278,10 @@ public class ShimmerLayout extends FrameLayout {
         Paint paint = new Paint();
         paint.setShader(gradient);
 
-        sourceMaskBitmap = createBitmap(width, height);
+        final Bitmap sourceMaskBitmap = createBitmap(width, height);
+        if (null == sourceMaskBitmap) {
+            return null;
+        }
         Canvas canvas = new Canvas(sourceMaskBitmap);
         canvas.rotate(shimmerAngle, width / 2, height / 2);
         canvas.drawRect(-maskRect.left, maskRect.top, width + maskRect.left, maskRect.bottom, paint);
@@ -372,8 +334,7 @@ public class ShimmerLayout extends FrameLayout {
         try {
             return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         } catch (OutOfMemoryError e) {
-            System.gc();
-            return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            return null;
         }
     }
 
