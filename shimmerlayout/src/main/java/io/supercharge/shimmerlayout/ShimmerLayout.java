@@ -51,7 +51,7 @@ public class ShimmerLayout extends FrameLayout {
     private float maskWidth;
     private float gradientCenterColorWidth;
 
-    private ViewTreeObserver.OnGlobalLayoutListener startAnimationGlobalLayoutListener;
+    private ViewTreeObserver.OnPreDrawListener startAnimationPreDrawListener;
 
     public ShimmerLayout(Context context) {
         this(context, null);
@@ -129,15 +129,17 @@ public class ShimmerLayout extends FrameLayout {
         }
 
         if (getWidth() == 0) {
-            startAnimationGlobalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
+            startAnimationPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
                 @Override
-                public void onGlobalLayout() {
-                    removeGlobalLayoutListener(this);
+                public boolean onPreDraw() {
+                    getViewTreeObserver().removeOnPreDrawListener(this);
                     startShimmerAnimation();
+
+                    return true;
                 }
             };
 
-            getViewTreeObserver().addOnGlobalLayoutListener(startAnimationGlobalLayoutListener);
+            getViewTreeObserver().addOnPreDrawListener(startAnimationPreDrawListener);
 
             return;
         }
@@ -148,8 +150,8 @@ public class ShimmerLayout extends FrameLayout {
     }
 
     public void stopShimmerAnimation() {
-        if (startAnimationGlobalLayoutListener != null) {
-            removeGlobalLayoutListener(startAnimationGlobalLayoutListener);
+        if (startAnimationPreDrawListener != null) {
+            getViewTreeObserver().removeOnPreDrawListener(startAnimationPreDrawListener);
         }
 
         resetShimmering();
@@ -387,14 +389,6 @@ public class ShimmerLayout extends FrameLayout {
         } else {
             //noinspection deprecation
             return getResources().getColor(id);
-        }
-    }
-
-    private void removeGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            getViewTreeObserver().removeOnGlobalLayoutListener(listener);
-        } else {
-            getViewTreeObserver().removeGlobalOnLayoutListener(listener);
         }
     }
 
