@@ -320,9 +320,12 @@ public class ShimmerLayout extends FrameLayout {
         paint.setShader(gradient);
 
         sourceMaskBitmap = createBitmap(width, height);
-        Canvas canvas = new Canvas(sourceMaskBitmap);
-        canvas.rotate(shimmerAngle, width / 2, height / 2);
-        canvas.drawRect(-maskRect.left, maskRect.top, width + maskRect.left, maskRect.bottom, paint);
+
+        if (sourceMaskBitmap != null) {
+            Canvas canvas = new Canvas(sourceMaskBitmap);
+            canvas.rotate(shimmerAngle, width / 2, height / 2);
+            canvas.drawRect(-maskRect.left, maskRect.top, width + maskRect.left, maskRect.bottom, paint);
+        }
 
         return sourceMaskBitmap;
     }
@@ -373,7 +376,8 @@ public class ShimmerLayout extends FrameLayout {
             return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         } catch (OutOfMemoryError e) {
             System.gc();
-            return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+            return null;
         }
     }
 
