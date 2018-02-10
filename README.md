@@ -7,7 +7,7 @@
 
 # ShimmerLayout
 
-`ShimmerLayout` can be used to add shimmer effect (like the one used at Facebook or at LinkedIn) to your Android application. Beside memory efficiency even animating a big layout, you can modify the shimmer color, width of the shimmer line, angle and the speed of the animation as well.
+`ShimmerLayout` can be used to add shimmer effect (like the one used at Facebook or at LinkedIn) to your Android application. Beside memory efficiency even animating a big layout, you can customize the behaviour and look of the animation. Check out the [**wiki**](https://github.com/team-supercharge/ShimmerLayout/wiki/Home) for attributes!
 
 ![ShimmerLayout](shimmerlayout.gif)
 
