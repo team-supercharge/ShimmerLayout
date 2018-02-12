@@ -34,14 +34,12 @@ public class ShimmerLayout extends FrameLayout {
 
     private int maskOffsetX;
     private Rect maskRect;
-    private Paint maskPaint;
+    private Paint gradientTexturePaint;
     private ValueAnimator maskAnimator;
 
-    private Bitmap localAvailableBitmap;
-    private Bitmap localMaskBitmap;
+    private Bitmap localDestinationBitmap;
     private Bitmap destinationBitmap;
-    private Bitmap sourceMaskBitmap;
-    private Canvas canvasForRendering;
+    private Canvas canvasForShimmerDrawing;
 
     private boolean isAnimationStarted;
     private boolean autoStart;
@@ -65,12 +63,6 @@ public class ShimmerLayout extends FrameLayout {
         super(context, attrs, defStyle);
 
         setWillNotDraw(false);
-
-        maskPaint = new Paint();
-        maskPaint.setAntiAlias(true);
-        maskPaint.setDither(true);
-        maskPaint.setFilterBitmap(true);
-        maskPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
 
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
@@ -107,7 +99,7 @@ public class ShimmerLayout extends FrameLayout {
         if (!isAnimationStarted || getWidth() <= 0 || getHeight() <= 0) {
             super.dispatchDraw(canvas);
         } else {
-            dispatchDrawUsingBitmap(canvas);
+            dispatchDrawShimmer(canvas);
         }
     }
 
@@ -229,44 +221,36 @@ public class ShimmerLayout extends FrameLayout {
         }
     }
 
-    private void dispatchDrawUsingBitmap(Canvas canvas) {
-        super.dispatchDraw(canvas);
-
-        localAvailableBitmap = getDestinationBitmap();
-        if (localAvailableBitmap == null) {
+    private void dispatchDrawShimmer(Canvas canvas) {
+        localDestinationBitmap = getDestinationBitmap();
+        if (localDestinationBitmap == null) {
             return;
         }
 
-        if (canvasForRendering == null) {
-            canvasForRendering = new Canvas(localAvailableBitmap);
+        if (canvasForShimmerDrawing == null) {
+            canvasForShimmerDrawing = new Canvas(localDestinationBitmap);
         }
 
-        drawMask(canvasForRendering);
-        canvas.save();
-        canvas.clipRect(maskOffsetX, 0, maskOffsetX + maskRect.width(), getHeight());
-        canvas.drawBitmap(localAvailableBitmap, 0, 0, null);
-        canvas.restore();
+        canvasForShimmerDrawing.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-        localAvailableBitmap = null;
+        super.dispatchDraw(canvasForShimmerDrawing);
+
+        drawShimmer(canvasForShimmerDrawing);
+        canvas.drawBitmap(localDestinationBitmap, 0, 0, null);
+
+        localDestinationBitmap = null;
     }
 
-    private void drawMask(Canvas renderCanvas) {
-        localMaskBitmap = getSourceMaskBitmap();
-        if (localMaskBitmap == null) {
-            return;
-        }
+    private void drawShimmer(Canvas destinationCanvas) {
+        createShimmerPaint();
 
-        renderCanvas.save();
-        renderCanvas.clipRect(maskOffsetX, 0,
-                maskOffsetX + localMaskBitmap.getWidth(),
-                getHeight());
+        destinationCanvas.save();
 
-        super.dispatchDraw(renderCanvas);
-        renderCanvas.drawBitmap(localMaskBitmap, maskOffsetX, 0, maskPaint);
+        destinationCanvas.rotate(shimmerAngle, maskOffsetX + maskRect.width() / 2, getHeight() / 2);
+        destinationCanvas.translate(maskOffsetX, 0);
+        destinationCanvas.drawRect(-maskRect.left, maskRect.top, maskRect.width() + maskRect.left, maskRect.bottom, gradientTexturePaint);
 
-        renderCanvas.restore();
-
-        localMaskBitmap = null;
+        destinationCanvas.restore();
     }
 
     private void resetShimmering() {
@@ -282,17 +266,12 @@ public class ShimmerLayout extends FrameLayout {
     }
 
     private void releaseBitMaps() {
-        if (sourceMaskBitmap != null) {
-            sourceMaskBitmap.recycle();
-            sourceMaskBitmap = null;
-        }
-
         if (destinationBitmap != null) {
             destinationBitmap.recycle();
             destinationBitmap = null;
         }
 
-        canvasForRendering = null;
+        canvasForShimmerDrawing = null;
     }
 
     private Bitmap getDestinationBitmap() {
@@ -303,33 +282,25 @@ public class ShimmerLayout extends FrameLayout {
         return destinationBitmap;
     }
 
-    private Bitmap getSourceMaskBitmap() {
-        if (sourceMaskBitmap != null) {
-            return sourceMaskBitmap;
+    private void createShimmerPaint() {
+        if (gradientTexturePaint != null) {
+            return;
         }
-
-        int width = maskRect.width();
-        int height = getHeight();
 
         final int edgeColor = reduceColorAlphaValueToZero(shimmerColor);
         LinearGradient gradient = new LinearGradient(
                 -maskRect.left, 0,
-                width + maskRect.left, 0,
+                maskRect.width() + maskRect.left, 0,
                 new int[]{edgeColor, shimmerColor, shimmerColor, edgeColor},
                 getGradientColorDistribution(),
                 Shader.TileMode.CLAMP);
-        Paint paint = new Paint();
-        paint.setShader(gradient);
 
-        sourceMaskBitmap = createBitmap(width, height);
-
-        if (sourceMaskBitmap != null) {
-            Canvas canvas = new Canvas(sourceMaskBitmap);
-            canvas.rotate(shimmerAngle, width / 2, height / 2);
-            canvas.drawRect(-maskRect.left, maskRect.top, width + maskRect.left, maskRect.bottom, paint);
-        }
-
-        return sourceMaskBitmap;
+        gradientTexturePaint = new Paint();
+        gradientTexturePaint.setAntiAlias(true);
+        gradientTexturePaint.setDither(true);
+        gradientTexturePaint.setFilterBitmap(true);
+        gradientTexturePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
+        gradientTexturePaint.setShader(gradient);
     }
 
     private Animator getShimmerAnimation() {
