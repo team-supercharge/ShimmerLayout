@@ -1,5 +1,12 @@
 # Change Log
 
+Version 1.2.0 *(2018-02-13)*
+----------------------------
+
+* Fix animation start at RecyclerView
+* Fix OOM exception
+* Optimize shimmer by reducing memory usage
+
 Version 1.1.0 *(2017-12-11)*
 ----------------------------
 
