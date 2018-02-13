@@ -15,7 +15,7 @@
 
 Get the latest artifact via gradle
 ```groovy
-implementation 'io.supercharge:shimmerlayout:1.1.0'
+implementation 'io.supercharge:shimmerlayout:1.2.0'
 ```
 
 Create the layout on which you want to apply the effect and add as a child of a `ShimmerLayout`
