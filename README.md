@@ -11,11 +11,23 @@
 
 ![ShimmerLayout](shimmerlayout.gif)
 
+# Performance
+
+When it comes to performance, `ShimmerLayout` is the best option available. Not only can you achieve **high frame rate** even in RecyclerViews, but it also animates views with **insignificant memory footprint**.
+
+I conducted a benchmark to compare memory usages between different shimmer implementations. The test device I used is a HTC M8 phone. For the animations the sample application was used.
+
+| Library used | Android Profiler result |
+| --- | --- |
+| Facebook shimmer library      | ![ShimmerLayout](benchmark_images/facebook_0_1_0.PNG)             |
+| ShimmerLayout 1.2.0           | ![ShimmerLayout](benchmark_images/shimmer_layout_1_2_0.PNG)       |
+| **ShimmerLayout 2.0.0**       | ![ShimmerLayout](benchmark_images/shimmer_layout_2_0_0.PNG)       |
+
 # Download and usage
 
 Get the latest artifact via gradle
 ```groovy
-implementation 'io.supercharge:shimmerlayout:1.2.0'
+implementation 'io.supercharge:shimmerlayout:2.0.0'
 ```
 
 Create the layout on which you want to apply the effect and add as a child of a `ShimmerLayout`
