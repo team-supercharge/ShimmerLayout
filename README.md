@@ -2,7 +2,6 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.supercharge/shimmerlayout/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/io.supercharge/shimmerlayout)
 [![Android Weekly](http://img.shields.io/badge/Android%20Weekly-%23266-2CB3E5.svg?style=flat)](http://androidweekly.net/issues/issue-266)
 [![API](https://img.shields.io/badge/API-14%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=14)
-[![Methods Count](https://img.shields.io/badge/Methods%20and%20size-103%20%7C%2010%20KB-e91e63.svg)](http://www.methodscount.com/?lib=io.supercharge%3Ashimmerlayout%3A1.0.2)
 [![Build Status](https://travis-ci.org/team-supercharge/ShimmerLayout.svg?branch=master)](https://travis-ci.org/team-supercharge/ShimmerLayout)
 
 # ShimmerLayout
