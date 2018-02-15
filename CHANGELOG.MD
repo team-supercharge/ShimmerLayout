@@ -1,5 +1,10 @@
 # Change Log
 
+Version 2.0.0 *(2018-02-15)*
+----------------------------
+
+* Achieve lower memory usage and higher frame rate
+
 Version 1.2.0 *(2018-02-13)*
 ----------------------------
 
