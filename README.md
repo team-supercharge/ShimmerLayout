@@ -21,9 +21,9 @@ I conducted a benchmark to compare memory usages between different shimmer imple
 
 | Library used | Android Profiler result |
 | --- | --- |
-| Facebook shimmer library      | ![ShimmerLayout](benchmark_images/facebook_0_1_0.PNG)             |
-| ShimmerLayout 1.2.0           | ![ShimmerLayout](benchmark_images/shimmer_layout_1_2_0.PNG)       |
-| **ShimmerLayout 2.0.0**       | ![ShimmerLayout](benchmark_images/shimmer_layout_2_0_0.PNG)       |
+| Facebook shimmer library 0.1.0        | ![ShimmerLayout](benchmark_images/facebook_0_1_0.PNG)             |
+| ShimmerLayout 1.2.0                   | ![ShimmerLayout](benchmark_images/shimmer_layout_1_2_0.PNG)       |
+| **ShimmerLayout 2.0.0**               | ![ShimmerLayout](benchmark_images/shimmer_layout_2_0_0.PNG)       |
 
 # Download and usage
 
