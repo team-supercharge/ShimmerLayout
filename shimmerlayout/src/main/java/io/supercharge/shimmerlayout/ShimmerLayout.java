@@ -6,14 +6,13 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ComposeShader;
 import android.graphics.LinearGradient;
-import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.os.Build;
@@ -37,9 +36,9 @@ public class ShimmerLayout extends FrameLayout {
     private Paint gradientTexturePaint;
     private ValueAnimator maskAnimator;
 
-    private Bitmap localDestinationBitmap;
-    private Bitmap destinationBitmap;
-    private Canvas canvasForShimmerDrawing;
+    private Bitmap localMaskBitmap;
+    private Bitmap maskBitmap;
+    private Canvas canvasForShimmerMask;
 
     private boolean isAnimationStarted;
     private boolean autoStart;
@@ -75,7 +74,7 @@ public class ShimmerLayout extends FrameLayout {
             shimmerColor = a.getColor(R.styleable.ShimmerLayout_shimmer_color, getColor(R.color.shimmer_color));
             autoStart = a.getBoolean(R.styleable.ShimmerLayout_shimmer_auto_start, false);
             maskWidth = a.getFloat(R.styleable.ShimmerLayout_shimmer_mask_width, 0.5F);
-            gradientCenterColorWidth = a.getFloat(R.styleable.ShimmerLayout_shimmer_gradient_center_color_width, 0.06F);
+            gradientCenterColorWidth = a.getFloat(R.styleable.ShimmerLayout_shimmer_gradient_center_color_width, 0.1F);
         } finally {
             a.recycle();
         }
@@ -178,8 +177,6 @@ public class ShimmerLayout extends FrameLayout {
     /**
      * Sets the width of the shimmer line to a value higher than 0 to less or equal to 1.
      * 1 means the width of the shimmer line is equal to half of the width of the ShimmerLayout.
-     * This value must be higher than {@link #gradientCenterColorWidth} or the shape of the shimmer line
-     * will not look like as expected.
      * The default value is 0.5.
      *
      * @param maskWidth The width of the shimmer line.
@@ -195,18 +192,16 @@ public class ShimmerLayout extends FrameLayout {
     }
 
     /**
-     * Sets the width of the center gradient color to a value higher than 0 to less or equal to 1.
-     * 1 means that the whole shimmer line will have this color without transparent edges.
-     * This value must be less than {@link #maskWidth} or the shape of the shimmer line
-     * will not look like as expected.
-     * The default value is 0.06.
+     * Sets the width of the center gradient color to a value higher than 0 to less than 1.
+     * 0.99 means that the whole shimmer line will have this color with a little transparent edges.
+     * The default value is 0.1.
      *
      * @param gradientCenterColorWidth The width of the center gradient color.
      */
     public void setGradientCenterColorWidth(float gradientCenterColorWidth) {
         if (gradientCenterColorWidth <= MIN_GRADIENT_CENTER_COLOR_WIDTH_VALUE
-                || MAX_GRADIENT_CENTER_COLOR_WIDTH_VALUE < gradientCenterColorWidth) {
-            throw new IllegalArgumentException(String.format("gradientCenterColorWidth value must be higher than %d and less or equal to %d",
+                || MAX_GRADIENT_CENTER_COLOR_WIDTH_VALUE <= gradientCenterColorWidth) {
+            throw new IllegalArgumentException(String.format("gradientCenterColorWidth value must be higher than %d and less than %d",
                     MIN_GRADIENT_CENTER_COLOR_WIDTH_VALUE, MAX_GRADIENT_CENTER_COLOR_WIDTH_VALUE));
         }
 
@@ -222,23 +217,29 @@ public class ShimmerLayout extends FrameLayout {
     }
 
     private void dispatchDrawShimmer(Canvas canvas) {
-        localDestinationBitmap = getDestinationBitmap();
-        if (localDestinationBitmap == null) {
+        super.dispatchDraw(canvas);
+
+        localMaskBitmap = getMaskBitmap();
+        if (localMaskBitmap == null) {
             return;
         }
 
-        if (canvasForShimmerDrawing == null) {
-            canvasForShimmerDrawing = new Canvas(localDestinationBitmap);
+        if (canvasForShimmerMask == null) {
+            canvasForShimmerMask = new Canvas(localMaskBitmap);
         }
 
-        canvasForShimmerDrawing.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        canvasForShimmerMask.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-        super.dispatchDraw(canvasForShimmerDrawing);
+        canvasForShimmerMask.save();
+        canvasForShimmerMask.translate(-maskOffsetX, 0);
 
-        drawShimmer(canvasForShimmerDrawing);
-        canvas.drawBitmap(localDestinationBitmap, 0, 0, null);
+        super.dispatchDraw(canvasForShimmerMask);
 
-        localDestinationBitmap = null;
+        canvasForShimmerMask.restore();
+
+        drawShimmer(canvas);
+
+        localMaskBitmap = null;
     }
 
     private void drawShimmer(Canvas destinationCanvas) {
@@ -246,9 +247,8 @@ public class ShimmerLayout extends FrameLayout {
 
         destinationCanvas.save();
 
-        destinationCanvas.rotate(shimmerAngle, maskOffsetX + maskRect.width() / 2, getHeight() / 2);
         destinationCanvas.translate(maskOffsetX, 0);
-        destinationCanvas.drawRect(-maskRect.left, maskRect.top, maskRect.width() + maskRect.left, maskRect.bottom, gradientTexturePaint);
+        destinationCanvas.drawRect(maskRect.left, 0, maskRect.width(), maskRect.height(), gradientTexturePaint);
 
         destinationCanvas.restore();
     }
@@ -260,26 +260,27 @@ public class ShimmerLayout extends FrameLayout {
         }
 
         maskAnimator = null;
+        gradientTexturePaint = null;
         isAnimationStarted = false;
 
         releaseBitMaps();
     }
 
     private void releaseBitMaps() {
-        if (destinationBitmap != null) {
-            destinationBitmap.recycle();
-            destinationBitmap = null;
-        }
+        canvasForShimmerMask = null;
 
-        canvasForShimmerDrawing = null;
+        if (maskBitmap != null) {
+            maskBitmap.recycle();
+            maskBitmap = null;
+        }
     }
 
-    private Bitmap getDestinationBitmap() {
-        if (destinationBitmap == null) {
-            destinationBitmap = createBitmap(getWidth(), getHeight());
+    private Bitmap getMaskBitmap() {
+        if (maskBitmap == null) {
+            maskBitmap = createBitmap(maskRect.width(), getHeight());
         }
 
-        return destinationBitmap;
+        return maskBitmap;
     }
 
     private void createShimmerPaint() {
@@ -288,19 +289,25 @@ public class ShimmerLayout extends FrameLayout {
         }
 
         final int edgeColor = reduceColorAlphaValueToZero(shimmerColor);
+        final float shimmerLineWidth = getWidth() / 2 * maskWidth;
+
         LinearGradient gradient = new LinearGradient(
-                -maskRect.left, 0,
-                maskRect.width() + maskRect.left, 0,
+                0, getHeight(),
+                (int) (Math.cos(Math.toRadians(shimmerAngle)) * shimmerLineWidth),
+                getHeight() + (int) (Math.sin(Math.toRadians(shimmerAngle)) * shimmerLineWidth),
                 new int[]{edgeColor, shimmerColor, shimmerColor, edgeColor},
                 getGradientColorDistribution(),
                 Shader.TileMode.CLAMP);
+
+        BitmapShader maskBitmapShader = new BitmapShader(localMaskBitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+
+        ComposeShader composeShader = new ComposeShader(gradient, maskBitmapShader, PorterDuff.Mode.DST_IN);
 
         gradientTexturePaint = new Paint();
         gradientTexturePaint.setAntiAlias(true);
         gradientTexturePaint.setDither(true);
         gradientTexturePaint.setFilterBitmap(true);
-        gradientTexturePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
-        gradientTexturePaint.setShader(gradient);
+        gradientTexturePaint.setShader(composeShader);
     }
 
     private Animator getShimmerAnimation() {
@@ -309,7 +316,7 @@ public class ShimmerLayout extends FrameLayout {
         }
 
         if (maskRect == null) {
-            maskRect = calculateMaskRect();
+            maskRect = calculateBitmapMaskRect();
         }
 
         final int animationToX = getWidth();
@@ -346,7 +353,7 @@ public class ShimmerLayout extends FrameLayout {
 
     private Bitmap createBitmap(int width, int height) {
         try {
-            return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            return Bitmap.createBitmap(width, height, Bitmap.Config.ALPHA_8);
         } catch (OutOfMemoryError e) {
             System.gc();
 
@@ -367,84 +374,26 @@ public class ShimmerLayout extends FrameLayout {
         return Color.argb(0, Color.red(actualColor), Color.green(actualColor), Color.blue(actualColor));
     }
 
-    private Rect calculateMaskRect() {
-        int shimmerWidth = getWidth() / 2;
-        if (shimmerAngle == 0) {
-            return new Rect((int) (shimmerWidth * getMaskPositionStartRatio()),
-                    0, (int) (shimmerWidth * getMaskPositionEndRatio()), getHeight());
-        }
-
-        int top = 0;
-        int center = (int) (getHeight() * 0.5);
-        int right = (int) (shimmerWidth * getMaskPositionEndRatio());
-        Point originalTopRight = new Point(right, top);
-        Point originalCenterRight = new Point(right, center);
-
-        Point rotatedTopRight = rotatePoint(originalTopRight, shimmerAngle, shimmerWidth / 2, getHeight() / 2);
-        Point rotatedCenterRight = rotatePoint(originalCenterRight, shimmerAngle, shimmerWidth / 2, getHeight() / 2);
-        Point rotatedIntersection = getTopIntersection(rotatedTopRight, rotatedCenterRight);
-        int halfMaskHeight = distanceBetween(rotatedCenterRight, rotatedIntersection);
-
-        int paddingVertical = (getHeight() / 2) - halfMaskHeight;
-        int paddingHorizontal = (shimmerWidth - rotatedIntersection.x);
-
-        return new Rect(paddingHorizontal, paddingVertical, shimmerWidth - paddingHorizontal, getHeight() - paddingVertical);
+    private Rect calculateBitmapMaskRect() {
+        return new Rect(0, 0, calculateMaskWidth(), getHeight());
     }
 
-    /**
-     * Finds the intersection of the line and the top of the canvas
-     *
-     * @param p1 First point of the line of which the intersection with the canvas should be determined
-     * @param p2 Second point of the line of which the intersection with the canvas should be determined
-     * @return The point of intersection
-     */
-    private Point getTopIntersection(Point p1, Point p2) {
-        double x1 = p1.x;
-        double x2 = p2.x;
-        double y1 = -p1.y;
-        double y2 = -p2.y;
-        // slope-intercept form of the line represented by the two points
-        double m = (y2 - y1) / (x2 - x1);
-        double b = y1 - m * x1;
-        // The intersection with the line represented by the top of the canvas
-        int x = (int) ((0 - b) / m);
-        int y = 0;
-        return new Point(x, y);
-    }
+    private int calculateMaskWidth() {
+        final double shimmerLineBottomWidth = (getWidth() / 2 * maskWidth) / Math.cos(Math.toRadians(shimmerAngle));
+        final double shimmerLineRemainingTopWidth = getHeight() * Math.tan(Math.toRadians(shimmerAngle));
 
-    private Point rotatePoint(Point point, float degrees, float cx, float cy) {
-        float[] pts = new float[2];
-        pts[0] = point.x;
-        pts[1] = point.y;
-
-        Matrix transform = new Matrix();
-        transform.setRotate(degrees, cx, cy);
-        transform.mapPoints(pts);
-
-        return new Point((int) pts[0], (int) pts[1]);
-    }
-
-    private int distanceBetween(Point p1, Point p2) {
-        return (int) Math.ceil(Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)));
+        return (int) (shimmerLineBottomWidth + shimmerLineRemainingTopWidth);
     }
 
     private float[] getGradientColorDistribution() {
         final float[] colorDistribution = new float[4];
 
-        colorDistribution[0] = getMaskPositionStartRatio();
-        colorDistribution[3] = getMaskPositionEndRatio();
+        colorDistribution[0] = 0;
+        colorDistribution[3] = 1;
 
         colorDistribution[1] = 0.5F - gradientCenterColorWidth / 2F;
         colorDistribution[2] = 0.5F + gradientCenterColorWidth / 2F;
 
         return colorDistribution;
-    }
-
-    private float getMaskPositionStartRatio() {
-        return (1F - maskWidth) / 2F;
-    }
-
-    private float getMaskPositionEndRatio() {
-        return 1F - getMaskPositionStartRatio();
     }
 }
