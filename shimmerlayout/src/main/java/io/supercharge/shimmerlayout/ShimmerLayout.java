@@ -40,6 +40,7 @@ public class ShimmerLayout extends FrameLayout {
     private Bitmap maskBitmap;
     private Canvas canvasForShimmerMask;
 
+    private boolean isAnimationReversed;
     private boolean isAnimationStarted;
     private boolean autoStart;
     private int shimmerAnimationDuration;
@@ -75,6 +76,7 @@ public class ShimmerLayout extends FrameLayout {
             autoStart = a.getBoolean(R.styleable.ShimmerLayout_shimmer_auto_start, false);
             maskWidth = a.getFloat(R.styleable.ShimmerLayout_shimmer_mask_width, 0.5F);
             gradientCenterColorWidth = a.getFloat(R.styleable.ShimmerLayout_shimmer_gradient_center_color_width, 0.1F);
+            isAnimationReversed = a.getBoolean(R.styleable.ShimmerLayout_shimmer_reverse_animation, false);
         } finally {
             a.recycle();
         }
@@ -155,6 +157,11 @@ public class ShimmerLayout extends FrameLayout {
 
     public void setShimmerAnimationDuration(int durationMillis) {
         this.shimmerAnimationDuration = durationMillis;
+        resetIfStarted();
+    }
+
+    public void setAnimationReversed(boolean animationReversed) {
+        this.isAnimationReversed = animationReversed;
         resetIfStarted();
     }
 
@@ -331,16 +338,15 @@ public class ShimmerLayout extends FrameLayout {
         final int shimmerBitmapWidth = maskRect.width();
         final int shimmerAnimationFullLength = animationToX - animationFromX;
 
-        maskAnimator = ValueAnimator.ofFloat(0.0F, 1.0F);
+        maskAnimator = isAnimationReversed ? ValueAnimator.ofInt(shimmerAnimationFullLength, 0)
+                : ValueAnimator.ofInt(0, shimmerAnimationFullLength);
         maskAnimator.setDuration(shimmerAnimationDuration);
         maskAnimator.setRepeatCount(ObjectAnimator.INFINITE);
 
-        final float[] value = new float[1];
         maskAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                value[0] = (Float) animation.getAnimatedValue();
-                maskOffsetX = ((int) (animationFromX + shimmerAnimationFullLength * value[0]));
+                maskOffsetX = animationFromX + (int) animation.getAnimatedValue();
 
                 if (maskOffsetX + shimmerBitmapWidth >= 0) {
                     invalidate();
