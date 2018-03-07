@@ -23,13 +23,16 @@ import android.widget.FrameLayout;
 public class ShimmerLayout extends FrameLayout {
 
     private static final int DEFAULT_ANIMATION_DURATION = 1500;
-    private static final int DEFAULT_ANGLE = 20;
-    private static final int MIN_ANGLE_VALUE = 0;
-    private static final int MAX_ANGLE_VALUE = 30;
-    private static final int MIN_MASK_WIDTH_VALUE = 0;
-    private static final int MAX_MASK_WIDTH_VALUE = 1;
-    private static final int MIN_GRADIENT_CENTER_COLOR_WIDTH_VALUE = 0;
-    private static final int MAX_GRADIENT_CENTER_COLOR_WIDTH_VALUE = 1;
+
+    private static final byte DEFAULT_ANGLE = 20;
+
+    private static final byte MIN_ANGLE_VALUE = -45;
+    private static final byte MAX_ANGLE_VALUE = 45;
+    private static final byte MIN_MASK_WIDTH_VALUE = 0;
+    private static final byte MAX_MASK_WIDTH_VALUE = 1;
+
+    private static final byte MIN_GRADIENT_CENTER_COLOR_WIDTH_VALUE = 0;
+    private static final byte MAX_GRADIENT_CENTER_COLOR_WIDTH_VALUE = 1;
 
     private int maskOffsetX;
     private Rect maskRect;
@@ -297,11 +300,12 @@ public class ShimmerLayout extends FrameLayout {
 
         final int edgeColor = reduceColorAlphaValueToZero(shimmerColor);
         final float shimmerLineWidth = getWidth() / 2 * maskWidth;
+        final float yPosition = (0 <= shimmerAngle) ? getHeight() : 0;
 
         LinearGradient gradient = new LinearGradient(
-                0, getHeight(),
-                (int) (Math.cos(Math.toRadians(shimmerAngle)) * shimmerLineWidth),
-                getHeight() + (int) (Math.sin(Math.toRadians(shimmerAngle)) * shimmerLineWidth),
+                0, yPosition,
+                (float) Math.cos(Math.toRadians(shimmerAngle)) * shimmerLineWidth,
+                yPosition + (float) Math.sin(Math.toRadians(shimmerAngle)) * shimmerLineWidth,
                 new int[]{edgeColor, shimmerColor, shimmerColor, edgeColor},
                 getGradientColorDistribution(),
                 Shader.TileMode.CLAMP);
@@ -385,8 +389,8 @@ public class ShimmerLayout extends FrameLayout {
     }
 
     private int calculateMaskWidth() {
-        final double shimmerLineBottomWidth = (getWidth() / 2 * maskWidth) / Math.cos(Math.toRadians(shimmerAngle));
-        final double shimmerLineRemainingTopWidth = getHeight() * Math.tan(Math.toRadians(shimmerAngle));
+        final double shimmerLineBottomWidth = (getWidth() / 2 * maskWidth) / Math.cos(Math.toRadians(Math.abs(shimmerAngle)));
+        final double shimmerLineRemainingTopWidth = getHeight() * Math.tan(Math.toRadians(Math.abs(shimmerAngle)));
 
         return (int) (shimmerLineBottomWidth + shimmerLineRemainingTopWidth);
     }
