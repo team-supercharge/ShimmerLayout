@@ -23,13 +23,16 @@ import android.widget.FrameLayout;
 public class ShimmerLayout extends FrameLayout {
 
     private static final int DEFAULT_ANIMATION_DURATION = 1500;
-    private static final int DEFAULT_ANGLE = 20;
-    private static final int MIN_ANGLE_VALUE = 0;
-    private static final int MAX_ANGLE_VALUE = 30;
-    private static final int MIN_MASK_WIDTH_VALUE = 0;
-    private static final int MAX_MASK_WIDTH_VALUE = 1;
-    private static final int MIN_GRADIENT_CENTER_COLOR_WIDTH_VALUE = 0;
-    private static final int MAX_GRADIENT_CENTER_COLOR_WIDTH_VALUE = 1;
+
+    private static final byte DEFAULT_ANGLE = 20;
+
+    private static final byte MIN_ANGLE_VALUE = -45;
+    private static final byte MAX_ANGLE_VALUE = 45;
+    private static final byte MIN_MASK_WIDTH_VALUE = 0;
+    private static final byte MAX_MASK_WIDTH_VALUE = 1;
+
+    private static final byte MIN_GRADIENT_CENTER_COLOR_WIDTH_VALUE = 0;
+    private static final byte MAX_GRADIENT_CENTER_COLOR_WIDTH_VALUE = 1;
 
     private int maskOffsetX;
     private Rect maskRect;
@@ -40,6 +43,7 @@ public class ShimmerLayout extends FrameLayout {
     private Bitmap maskBitmap;
     private Canvas canvasForShimmerMask;
 
+    private boolean isAnimationReversed;
     private boolean isAnimationStarted;
     private boolean autoStart;
     private int shimmerAnimationDuration;
@@ -75,6 +79,7 @@ public class ShimmerLayout extends FrameLayout {
             autoStart = a.getBoolean(R.styleable.ShimmerLayout_shimmer_auto_start, false);
             maskWidth = a.getFloat(R.styleable.ShimmerLayout_shimmer_mask_width, 0.5F);
             gradientCenterColorWidth = a.getFloat(R.styleable.ShimmerLayout_shimmer_gradient_center_color_width, 0.1F);
+            isAnimationReversed = a.getBoolean(R.styleable.ShimmerLayout_shimmer_reverse_animation, false);
         } finally {
             a.recycle();
         }
@@ -155,6 +160,11 @@ public class ShimmerLayout extends FrameLayout {
 
     public void setShimmerAnimationDuration(int durationMillis) {
         this.shimmerAnimationDuration = durationMillis;
+        resetIfStarted();
+    }
+
+    public void setAnimationReversed(boolean animationReversed) {
+        this.isAnimationReversed = animationReversed;
         resetIfStarted();
     }
 
@@ -290,11 +300,12 @@ public class ShimmerLayout extends FrameLayout {
 
         final int edgeColor = reduceColorAlphaValueToZero(shimmerColor);
         final float shimmerLineWidth = getWidth() / 2 * maskWidth;
+        final float yPosition = (0 <= shimmerAngle) ? getHeight() : 0;
 
         LinearGradient gradient = new LinearGradient(
-                0, getHeight(),
-                (int) (Math.cos(Math.toRadians(shimmerAngle)) * shimmerLineWidth),
-                getHeight() + (int) (Math.sin(Math.toRadians(shimmerAngle)) * shimmerLineWidth),
+                0, yPosition,
+                (float) Math.cos(Math.toRadians(shimmerAngle)) * shimmerLineWidth,
+                yPosition + (float) Math.sin(Math.toRadians(shimmerAngle)) * shimmerLineWidth,
                 new int[]{edgeColor, shimmerColor, shimmerColor, edgeColor},
                 getGradientColorDistribution(),
                 Shader.TileMode.CLAMP);
@@ -331,16 +342,15 @@ public class ShimmerLayout extends FrameLayout {
         final int shimmerBitmapWidth = maskRect.width();
         final int shimmerAnimationFullLength = animationToX - animationFromX;
 
-        maskAnimator = ValueAnimator.ofFloat(0.0F, 1.0F);
+        maskAnimator = isAnimationReversed ? ValueAnimator.ofInt(shimmerAnimationFullLength, 0)
+                : ValueAnimator.ofInt(0, shimmerAnimationFullLength);
         maskAnimator.setDuration(shimmerAnimationDuration);
         maskAnimator.setRepeatCount(ObjectAnimator.INFINITE);
 
-        final float[] value = new float[1];
         maskAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                value[0] = (Float) animation.getAnimatedValue();
-                maskOffsetX = ((int) (animationFromX + shimmerAnimationFullLength * value[0]));
+                maskOffsetX = animationFromX + (int) animation.getAnimatedValue();
 
                 if (maskOffsetX + shimmerBitmapWidth >= 0) {
                     invalidate();
@@ -379,8 +389,8 @@ public class ShimmerLayout extends FrameLayout {
     }
 
     private int calculateMaskWidth() {
-        final double shimmerLineBottomWidth = (getWidth() / 2 * maskWidth) / Math.cos(Math.toRadians(shimmerAngle));
-        final double shimmerLineRemainingTopWidth = getHeight() * Math.tan(Math.toRadians(shimmerAngle));
+        final double shimmerLineBottomWidth = (getWidth() / 2 * maskWidth) / Math.cos(Math.toRadians(Math.abs(shimmerAngle)));
+        final double shimmerLineRemainingTopWidth = getHeight() * Math.tan(Math.toRadians(Math.abs(shimmerAngle)));
 
         return (int) (shimmerLineBottomWidth + shimmerLineRemainingTopWidth);
     }
