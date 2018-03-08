@@ -1,5 +1,12 @@
 # Change Log
 
+Version 2.1.0 *(2018-03-08)*
+----------------------------
+
+* Update buildToolsVersion number
+* Angle now can be as low as -45 and as high as 45
+* Add reversed animation
+
 Version 2.0.0 *(2018-02-15)*
 ----------------------------
 
