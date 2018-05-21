@@ -124,7 +124,7 @@ public class ShimmerLayout extends FrameLayout {
             return;
         }
 
-        if (getWidth() == 0) {
+        if (getWidth() == 0 || isLayoutRequested()) {
             startAnimationPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
