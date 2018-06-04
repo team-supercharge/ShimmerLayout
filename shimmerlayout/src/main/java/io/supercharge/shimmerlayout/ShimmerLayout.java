@@ -17,6 +17,7 @@ import android.graphics.Rect;
 import android.graphics.Shader;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
@@ -90,6 +91,44 @@ public class ShimmerLayout extends FrameLayout {
         if (autoStart && getVisibility() == VISIBLE) {
             startShimmerAnimation();
         }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (changed) {
+            clearMask();
+        }
+    }
+
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        if (visibility == VISIBLE) {
+            doAttach();
+        } else {
+            doDetach();
+        }
+    }
+
+    private void doAttach() {
+        if (autoStart && !isAnimationStarted) {
+            startShimmerAnimation();
+        }
+    }
+
+    private void doDetach() {
+        if (isAnimationStarted) {
+            stopShimmerAnimation();
+        }
+    }
+
+    private void clearMask() {
+        maskRect = calculateBitmapMaskRect();
+        gradientTexturePaint = null;
+        maskBitmap = null;
+        localMaskBitmap = null;
+        canvasForShimmerMask = null;
     }
 
     @Override
