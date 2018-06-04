@@ -101,28 +101,6 @@ public class ShimmerLayout extends FrameLayout {
         }
     }
 
-    @Override
-    protected void onVisibilityChanged(View changedView, int visibility) {
-        super.onVisibilityChanged(changedView, visibility);
-        if (visibility == VISIBLE) {
-            doAttach();
-        } else {
-            doDetach();
-        }
-    }
-
-    private void doAttach() {
-        if (autoStart && !isAnimationStarted) {
-            startShimmerAnimation();
-        }
-    }
-
-    private void doDetach() {
-        if (isAnimationStarted) {
-            stopShimmerAnimation();
-        }
-    }
-
     private void clearMask() {
         maskRect = calculateBitmapMaskRect();
         gradientTexturePaint = null;
