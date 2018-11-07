@@ -17,6 +17,7 @@ import android.graphics.Rect;
 import android.graphics.Shader;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
@@ -87,6 +88,9 @@ public class ShimmerLayout extends FrameLayout {
         setMaskWidth(maskWidth);
         setGradientCenterColorWidth(gradientCenterColorWidth);
         setShimmerAngle(shimmerAngle);
+
+        enableForcedSoftwareLayerIfNeeded();
+
         if (autoStart && getVisibility() == VISIBLE) {
             startShimmerAnimation();
         }
@@ -405,5 +409,15 @@ public class ShimmerLayout extends FrameLayout {
         colorDistribution[2] = 0.5F + gradientCenterColorWidth / 2F;
 
         return colorDistribution;
+    }
+
+    /**
+     * in ShimmerLayout is used ComposeShader, which contains bug in android 4.1.1 with layer hardware acceleration
+     * @see <a href="https://stackoverflow.com/questions/12445583/issue-with-composeshader-on-android-4-1-1">StackOverflow</a>
+     */
+    private void enableForcedSoftwareLayerIfNeeded() {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN) {
+            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
     }
 }
