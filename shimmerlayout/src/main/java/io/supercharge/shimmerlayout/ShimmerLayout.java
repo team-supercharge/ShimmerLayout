@@ -157,6 +157,10 @@ public class ShimmerLayout extends FrameLayout {
         resetShimmering();
     }
 
+    public boolean isAnimationStarted() {
+        return isAnimationStarted;
+    }
+
     public void setShimmerColor(int shimmerColor) {
         this.shimmerColor = shimmerColor;
         resetIfStarted();
