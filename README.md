@@ -77,4 +77,4 @@ limitations under the License.
 
 [veghtomi](https://github.com/veghtomi)   
 
-[![Supercharge](http://s23.postimg.org/gbpv7dwjr/unnamed.png)](http://supercharge.io/)
+[![Supercharge](https://avatars3.githubusercontent.com/u/8873717?s=200&v=4)](http://supercharge.io/)
