@@ -4,7 +4,8 @@
 [![API](https://img.shields.io/badge/API-14%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=14)
 [![Build Status](https://travis-ci.org/team-supercharge/ShimmerLayout.svg?branch=master)](https://travis-ci.org/team-supercharge/ShimmerLayout)
 
-# ShimmerLayout
+# DEPRECATED - ShimmerLayout
+Attention: This tool is now deprecated. Please switch to [Shimmer for Android](https://github.com/facebook/shimmer-android) or any other shimmer effect solution.
 
 `ShimmerLayout` can be used to add shimmer effect (like the one used at Facebook or at LinkedIn) to your Android application. Beside memory efficiency even animating a big layout, you can customize the behaviour and look of the animation. Check out the [**wiki**](https://github.com/team-supercharge/ShimmerLayout/wiki/Home) for attributes!
 
