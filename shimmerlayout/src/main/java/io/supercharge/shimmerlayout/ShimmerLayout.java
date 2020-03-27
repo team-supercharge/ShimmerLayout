@@ -129,6 +129,7 @@ public class ShimmerLayout extends FrameLayout {
         }
 
         if (getWidth() == 0) {
+            getViewTreeObserver().removeOnPreDrawListener(startAnimationPreDrawListener);
             startAnimationPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
