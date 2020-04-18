@@ -97,6 +97,14 @@ public class ShimmerLayout extends FrameLayout {
     }
 
     @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (changed) {
+            updateShimmerAnimation();
+        }
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         resetShimmering();
         super.onDetachedFromWindow();
@@ -128,7 +136,7 @@ public class ShimmerLayout extends FrameLayout {
             return;
         }
 
-        if (getWidth() == 0) {
+        if (getWidth() == 0 || isLayoutRequested()) {
             startAnimationPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
@@ -144,7 +152,35 @@ public class ShimmerLayout extends FrameLayout {
             return;
         }
 
-        Animator animator = getShimmerAnimation();
+        Animator animator = getShimmerAnimation(0);
+        animator.start();
+        isAnimationStarted = true;
+    }
+
+    private void updateShimmerAnimation() {
+        if (!isAnimationStarted) {
+            return;
+        }
+        long currentPlayTime = maskAnimator.getCurrentPlayTime();
+
+        if (getWidth() == 0 || isLayoutRequested()) {
+            startAnimationPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    getViewTreeObserver().removeOnPreDrawListener(this);
+                    updateShimmerAnimation();
+                    return true;
+                }
+            };
+
+            getViewTreeObserver().addOnPreDrawListener(startAnimationPreDrawListener);
+
+            return;
+        }
+        if (maskAnimator != null) {
+            resetShimmering();
+        }
+        Animator animator = getShimmerAnimation(currentPlayTime);
         animator.start();
         isAnimationStarted = true;
     }
@@ -329,7 +365,7 @@ public class ShimmerLayout extends FrameLayout {
         gradientTexturePaint.setShader(composeShader);
     }
 
-    private Animator getShimmerAnimation() {
+    private Animator getShimmerAnimation(long currentPlayTime) {
         if (maskAnimator != null) {
             return maskAnimator;
         }
@@ -354,6 +390,7 @@ public class ShimmerLayout extends FrameLayout {
                 : ValueAnimator.ofInt(0, shimmerAnimationFullLength);
         maskAnimator.setDuration(shimmerAnimationDuration);
         maskAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        maskAnimator.setCurrentPlayTime(currentPlayTime);
 
         maskAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
