@@ -97,6 +97,22 @@ public class ShimmerLayout extends FrameLayout {
     }
 
     @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (changed) {
+            clearMask();
+        }
+    }
+
+    private void clearMask() {
+        maskRect = calculateBitmapMaskRect();
+        gradientTexturePaint = null;
+        maskBitmap = null;
+        localMaskBitmap = null;
+        canvasForShimmerMask = null;
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         resetShimmering();
         super.onDetachedFromWindow();
